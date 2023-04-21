@@ -5,7 +5,9 @@
   "main": "index.js",
   "type": "module",
   "scripts": {
-    "start": "NODE_ENV=development webpack serve --config webpack.config.cjs",
+    "start": "concurrently \"pnpm --prefix server start\" \"pnpm start:client\"",
+    "start:client": "NODE_ENV=development webpack serve --config webpack.config.cjs",
+    "start:server": "pnpm --prefix server start",
     "build": "NODE_ENV=production webpack --config webpack.config.cjs",
     "lint": "eslint --ext .js,.jsx,.ts,.tsx src",
     "lint:fix": "eslint --ext .js,.jsx,.ts,.tsx src --fix",
@@ -16,9 +18,12 @@
   "license": "ISC",
   "dependencies": {
     "autoprefixer": "^10.4.14",
+    "postcss": "^8.4.23",
     "postcss-loader": "^7.2.4",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
+    "sqlite": "^4.1.2",
+    "sqlite3": "^5.1.6",
     "tailwindcss": "^3.3.1",
     "typescript": "^5.0.4"
   },
@@ -29,8 +34,10 @@
     "@babel/preset-typescript": "^7.21.4",
     "@pmmmwh/react-refresh-webpack-plugin": "^0.5.10",
     "@types/react": "^18.0.37",
+    "@types/react-dom": "^18.0.11",
     "@typescript-eslint/eslint-plugin": "^5.59.0",
     "babel-loader": "^9.1.2",
+    "concurrently": "^8.0.1",
     "css-loader": "^6.7.3",
     "eslint": "^8.38.0",
     "eslint-config-prettier": "^8.8.0",
@@ -44,5 +51,10 @@
     "webpack": "^5.80.0",
     "webpack-cli": "^5.0.1",
     "webpack-dev-server": "^4.13.3"
+  },
+  "browser": {
+    "fs": false,
+    "os": false,
+    "path": false
   }
 }

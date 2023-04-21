@@ -1,5 +1,3 @@
-// webpack.config.cjs
-
 const path = require('path');
 const MiniCssExtractPlugin = require('mini-css-extract-plugin');
 const ReactRefreshWebpackPlugin = require('@pmmmwh/react-refresh-webpack-plugin');
@@ -32,7 +30,7 @@ module.exports = {
       {
         test: /\.css$/,
         use: [
-          isProduction ? MiniCssExtractPlugin.loader : 'style-loader',
+          'style-loader',
           'css-loader',
           'postcss-loader',
         ],
