@@ -8,13 +8,14 @@ export default async function handler(
 ) {
   if (req.method === 'POST') {
     try {
-      const noteData = req.body;
+      const noteData = req.body
+      console.log(noteData)
       const newNote = await prisma.note.create({
         data: noteData,
       });
       res.status(201).json(newNote);
     } catch (error) {
-      res.status(500).json({ error: 'Error creating note' });
+      res.status(500).json({ error: "Error updating note", message: error });
     }
   } else {
     res.status(405).json({ error: 'Method not allowed' });

@@ -10,8 +10,12 @@ export interface Note {
   id: string;
   title: string;
   content: string;
-  publishedAt: Date;
-  updatedAt: Date;
+  publishedAt: string;
+  updatedAt: string;
+  wordCount?: number;
+  characterCount?: number;
+  summary?: string;
+  readingTime?: number;
 }
 
 export interface NoteList {

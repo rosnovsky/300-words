@@ -1,5 +1,5 @@
 import type { NextApiRequest, NextApiResponse } from 'next';
-import { PrismaClient } from '@prisma/client';
+import { PrismaClient, Note } from '@prisma/client';
 const prisma = new PrismaClient();
 
 export default async function handler(
@@ -8,17 +8,16 @@ export default async function handler(
 ) {
   if (req.method === 'DELETE') {
     try {
-      const id = req.query.id;
-      console.log(id);
-      if (!id) throw new Error('No note id provided');
+      if (!req.query.id) throw new Error('No note id provided');
+      const id: Note['id'] = req.query.id as string;
       const deletedNote = await prisma.note.delete({
         where: {
-          id: id as string,
+          id: id
         },
       });
-      res.status(201).json(deletedNote);
+      res.status(201).json({ success: true, message: deletedNote.id });
     } catch (error) {
-      res.status(500).json({ error });
+      res.status(500).json({ error: "Error deleting note", message: error });
     }
   } else {
     res.status(405).json({ error: 'Method not allowed' });

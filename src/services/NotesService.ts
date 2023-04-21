@@ -1,4 +1,4 @@
-import type { Note } from '../types';
+import type { Note } from '@prisma/client';
 
 class NoteService {
   async getAllNotes(): Promise<Note[]> {
@@ -7,42 +7,50 @@ class NoteService {
   }
 
   async createNote(note: Omit<Note, 'id' | 'updatedAt' | 'publishedAt'>) {
-    const notes = await fetch('http://localhost:3000/api/notes/create', {
+    const title = new Date().toLocaleDateString('en-US', {
+      day: 'numeric',
+      month: 'long',
+      year: 'numeric',
+      hour: 'numeric',
+      minute: 'numeric',
+    })
+    const noteWithTitle = {
+      ...note,
+      title
+    }
+    const createdNote = await fetch('http://localhost:3000/api/notes/create', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
         'Accept': 'application/json'
       },
 
-      body: JSON.stringify(note)
+      body: JSON.stringify(noteWithTitle)
     }).then(res => res.json());
-    return notes;
+    return createdNote.id;
   }
 
   async updateNote(note: Note) {
-    const notes = await fetch('http://localhost:3000/api/notes/update', {
+    const updatedNote = await fetch('http://localhost:3000/api/notes/update', {
       method: 'PUT',
       headers: {
         'Content-Type': 'application/json',
         'Accept': 'application/json'
       },
-
       body: JSON.stringify(note)
     }).then(res => res.json());
-    return notes;
+    return updatedNote.id;
   }
 
   async deleteNote(id: string) {
-    const notes = await fetch('http://localhost:3000/api/notes/delete', {
+    const deletedNote = await fetch(`http://localhost:3000/api/notes/delete/${id}`, {
       method: 'DELETE',
       headers: {
         'Content-Type': 'application/json',
         'Accept': 'application/json'
       },
-
-      body: JSON.stringify({ id })
     }).then(res => res.json());
-    return notes;
+    return deletedNote.id;
   }
 
 }

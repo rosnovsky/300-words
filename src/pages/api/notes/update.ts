@@ -1,5 +1,5 @@
 import type { NextApiRequest, NextApiResponse } from 'next';
-import { PrismaClient } from '@prisma/client';
+import { PrismaClient, Note } from '@prisma/client';
 const prisma = new PrismaClient();
 
 export default async function handler(
@@ -8,14 +8,14 @@ export default async function handler(
 ) {
   if (req.method === 'PUT') {
     try {
-      const noteData = req.body;
-      const newNote = await prisma.note.update({
+      const noteData: Note = req.body;
+      const updatedNote = await prisma.note.update({
         where: { id: noteData.id },
         data: noteData,
       });
-      res.status(201).json(newNote);
+      res.status(201).json({ success: true, message: updatedNote.id });
     } catch (error) {
-      res.status(500).json({ error: 'Error updating note' });
+      res.status(500).json({ error: "Error updating note", message: error });
     }
   }
   else {
