@@ -7,9 +7,11 @@ declare namespace NodeJS {
 }
 
 export interface Note {
-  id: number;
+  id: string;
   title: string;
   content: string;
+  publishedAt: Date;
+  updatedAt: Date;
 }
 
 export interface NoteList {

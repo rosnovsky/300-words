@@ -2,36 +2,51 @@ import type { Note } from '../types';
 
 class NoteService {
   async getAllNotes(): Promise<Note[]> {
-    const response = await fetch('http://localhost:9090/api/notes');
-    const notes = await response.json();
-    if (!notes) {
-      return [{ id: 0, title: 'title', content: 'content' }];
-    }
+    const notes = await fetch('http://localhost:3000/api/notes/all').then(res => res.json());
     return notes;
   }
 
-  async createNote(title: string, content: string): Promise<Note> {
-    const response = await fetch('http://localhost:9090/api/notes', {
+  async createNote(note: Omit<Note, 'id' | 'updatedAt' | 'publishedAt'>) {
+    const notes = await fetch('http://localhost:3000/api/notes/create', {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ title, content }),
-    });
+      headers: {
+        'Content-Type': 'application/json',
+        'Accept': 'application/json'
+      },
 
-    if (response.ok) {
-      const newNote = await response.json();
-      return newNote;
-    } else {
-      throw new Error('An error occurred while creating the note.');
-    }
+      body: JSON.stringify(note)
+    }).then(res => res.json());
+    return notes;
   }
 
-  // async updateNote(id: number, title: string, content: string): Promise<Note> {
-  //   // Implement the method to update a note
-  // }
+  async updateNote(note: Note) {
+    const notes = await fetch('http://localhost:3000/api/notes/update', {
+      method: 'PUT',
+      headers: {
+        'Content-Type': 'application/json',
+        'Accept': 'application/json'
+      },
 
-  // async deleteNote(id: number): Promise<void> {
-  //   // Implement the method to delete a note
-  // }
+      body: JSON.stringify(note)
+    }).then(res => res.json());
+    return notes;
+  }
+
+  async deleteNote(id: string) {
+    const notes = await fetch('http://localhost:3000/api/notes/delete', {
+      method: 'DELETE',
+      headers: {
+        'Content-Type': 'application/json',
+        'Accept': 'application/json'
+      },
+
+      body: JSON.stringify({ id })
+    }).then(res => res.json());
+    return notes;
+  }
+
 }
 
-export default new NoteService();
+const noteService = new NoteService()
+
+export default noteService;

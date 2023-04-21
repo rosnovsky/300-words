@@ -1,23 +1,21 @@
 import React, { useState } from 'react';
+import { Note } from '../types';
 
 interface NoteFormProps {
-  title?: string;
-  content?: string;
-  onSubmit: (title: string, content: string) => void;
+  onSubmit: (note: Omit<Note, 'id' | 'updatedAt' | 'publishedAt'>) => void;
 }
 
 const NoteForm: React.FC<NoteFormProps> = ({
-  title: initialTitle = '',
-  content: initialContent = '',
   onSubmit,
 }) => {
-  const [title, setTitle] = useState(initialTitle);
-  const [content, setContent] = useState(initialContent);
+  const [title, setTitle] = useState<string>("");
+  const [content, setContent] = useState<string>("");
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    onSubmit(title, content);
-    alert(title);
+    if (!title || !content) return;
+    const note = { title, content }
+    onSubmit(note);
   };
 
   return (
@@ -46,7 +44,7 @@ const NoteForm: React.FC<NoteFormProps> = ({
         </label>
         <textarea
           id="note-content"
-          // value={content}
+          value={content}
           onChange={(e) => setContent(e.target.value)}
           className="w-full p-2 border border-gray-300 rounded"
           rows={5}
@@ -62,4 +60,4 @@ const NoteForm: React.FC<NoteFormProps> = ({
   );
 };
 
-export default NoteForm;
+export default NoteForm

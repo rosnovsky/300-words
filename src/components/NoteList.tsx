@@ -1,8 +1,7 @@
 import React from 'react';
 import Note from './Note';
-import type { NoteList as NoteListType } from '../types';
 
-const NoteList: React.FC<NoteListType> = ({ notes }) => {
+const NoteList = ({ notes, setReloadNotes }) => {
   return (
     <div className="note-list grid gap-4 md:grid-cols-2 lg:grid-cols-3">
       {notes.length > 0 &&
@@ -12,6 +11,7 @@ const NoteList: React.FC<NoteListType> = ({ notes }) => {
             key={note.id}
             id={note.id}
             content={note.content}
+            setReloadNotes={setReloadNotes}
           />
         ))}
     </div>
