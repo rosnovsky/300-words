@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import type { Note } from '@prisma/client';
 import useNotes from '../hooks/useNotes';
+import { useLocalStorage } from '../hooks/useLocalStorage';
 
 interface NoteFormProps {
   initialValue: Note | null;
@@ -9,6 +10,19 @@ interface NoteFormProps {
   onSubmit: (note: Note | Omit<Note, "title" | "id" | 'publishedAt' | 'updatedAt'>) => void;
 }
 
+const loadFromLocalStorage = (key?: string) => {
+  if (typeof window === 'undefined') {
+    return null;
+  }
+
+  if (!key) return null;
+
+  const value = localStorage.getItem(key);
+  if (!value || value === "") return null;
+  return JSON.parse(value);
+}
+
+
 const NoteForm: React.FC<NoteFormProps> = ({
   onSubmit,
   initialValue,
@@ -16,28 +30,41 @@ const NoteForm: React.FC<NoteFormProps> = ({
   setIsEditing
 }: NoteFormProps
 ) => {
-
-  const [note, setNoteContent] = useNotes(initialValue || { content: "", id: "", title: "", publishedAt: new Date(), updatedAt: new Date() });
+  const [noteContent, setNoteContent] = useNotes(loadFromLocalStorage(initialValue?.id || 'new-note') || "");
+  const [localStorage, setLocalStorage] = useLocalStorage();
+  const [initialLoad, setInitialLoad] = useState(true);
 
   useEffect(() => {
-    if (initialValue) {
-      setNoteContent(initialValue.content);
-    } else {
-      setNoteContent("");
+    if (isEditing && initialValue) {
+      const value = loadFromLocalStorage(initialValue?.id);
+      if (value) {
+        setNoteContent(value);
+      }
+      setLocalStorage.setValue(initialValue?.id, initialValue.content);
     }
-  }, [initialValue]);
+    setInitialLoad(false);
+  }, [isEditing, initialValue])
+
+  useEffect(() => {
+    if (isEditing && !initialLoad) {
+      setLocalStorage.setValue(initialValue?.id || 'new-note', noteContent.noteContent);
+      return;
+    }
+    setLocalStorage.setValue('new-note', noteContent.noteContent);
+  }, [noteContent, initialLoad])
+
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    if (!note.noteContent) return;
+    if (!noteContent.noteContent) return;
     if (isEditing && initialValue) {
-      onSubmit({ content: note.noteContent, id: initialValue.id });
-      setNoteContent("");
-      localStorage.removeItem('noteContent');
+      onSubmit({ content: noteContent.noteContent, id: initialValue.id });
+      setIsEditing(false);
+      setLocalStorage.deleteKey(initialValue.id);
+      setNoteContent("")
     } else {
-      onSubmit({ content: note.noteContent });
-      setNoteContent("");
-      localStorage.removeItem('noteContent');
+      onSubmit({ content: noteContent.noteContent });
+      setLocalStorage.deleteKey('new-note');
     }
   };
 
@@ -50,11 +77,11 @@ const NoteForm: React.FC<NoteFormProps> = ({
             htmlFor="note-content"
             className="block text-gray-700 font-medium mb-2"
           >
-            Note <span className="text-sm text-gray-500">{note.wordCount} words, {note.characterCount} characters</span>
+            Note <span className="text-sm text-gray-500">{noteContent.wordCount} words, {noteContent.characterCount} characters</span>
           </label>
           <textarea
             id="note-content"
-            value={note.noteContent}
+            value={noteContent.noteContent}
             onChange={(e) => setNoteContent(e.target.value)}
             className="w-full p-2 border border-gray-300 rounded"
             rows={5}
@@ -63,7 +90,7 @@ const NoteForm: React.FC<NoteFormProps> = ({
         <button
           type="submit"
           className="bg-blue-500 hover:bg-blue-600 text-white font-medium py-2 px-4 rounded disabled:bg-blue-300"
-          disabled={!note.valid || (isEditing && initialValue?.content === note.noteContent)}
+          disabled={!noteContent.valid || (isEditing && initialValue?.content === noteContent.noteContent)}
         >
           {isEditing ? "Update Note" : "Save Note"}
         </button>
@@ -72,7 +99,7 @@ const NoteForm: React.FC<NoteFormProps> = ({
           onClick={() => {
             setNoteContent("");
             setIsEditing(false);
-            initialValue = null
+            setLocalStorage.deleteKey(initialValue!.id);
           }}
         >Cancel</button>}
       </form>

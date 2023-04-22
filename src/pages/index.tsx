@@ -5,7 +5,6 @@ import React, { useState, useEffect } from 'react';
 import NoteForm from '../components/NoteForm';
 import Head from 'next/head';
 import NotesService from '../services/NotesService';
-import useNotes from '../hooks/useNotes';
 
 const atkinson = Atkinson_Hyperlegible({ weight: ['400'], subsets: ['latin'] })
 
@@ -14,7 +13,6 @@ const App: React.FC = () => {
   const [reloadNotes, setReloadNotes] = useState<boolean>(false);
   const [editingNote, setEditingNote] = useState<Note | null>(null);
   const [isEditing, setIsEditing] = useState<boolean>(false);
-  const [noteData, setNoteContent] = useNotes(editingNote);
 
   useEffect(() => {
     const fetchNotes = async () => {
@@ -36,13 +34,12 @@ const App: React.FC = () => {
     setReloadNotes(!reloadNotes);
   };
 
-  const handleUpdate = (noteId: string, content: string) => {
-    if (!noteId) return;
-    const noteToUpdate = notes.find((note) => note.id === noteId);
+  const handleUpdate = (note: Note) => {
+    if (!note.id) return;
+    const noteToUpdate = notes.find((noteToUpdate) => noteToUpdate.id === note.id);
     if (noteToUpdate) {
       setEditingNote(noteToUpdate);
       setIsEditing(true);
-      setNoteContent(noteToUpdate);
     }
   };
 
@@ -51,7 +48,6 @@ const App: React.FC = () => {
     await NotesService.deleteNote(note.id);
     setReloadNotes(!reloadNotes);
   };
-
 
   return (
     <div className={`${atkinson.className} app min-h-screen bg-gray-100 py-10`}>
@@ -64,7 +60,7 @@ const App: React.FC = () => {
         </h1>
         <NoteList notes={notes} setReloadNotes={setReloadNotes} onUpdateClick={handleUpdate} onDeleteClick={handleDelete} />
         <div className="mt-10 w-full lg:w-1/2 mx-auto">
-          <NoteForm onSubmit={handleFormSubmit} initialValues={editingNote} isEditing={isEditing} setIsEditing={setIsEditing} />
+          <NoteForm onSubmit={handleFormSubmit} initialValue={editingNote} isEditing={isEditing} setIsEditing={setIsEditing} />
         </div>
       </div>
     </div>
