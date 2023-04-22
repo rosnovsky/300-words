@@ -5,6 +5,7 @@ import React, { useState, useEffect } from 'react';
 import NoteForm from '../components/NoteForm';
 import Head from 'next/head';
 import NotesService from '../services/NotesService';
+import useNotes from '../hooks/useNotes';
 
 const atkinson = Atkinson_Hyperlegible({ weight: ['400'], subsets: ['latin'] })
 
@@ -13,6 +14,7 @@ const App: React.FC = () => {
   const [reloadNotes, setReloadNotes] = useState<boolean>(false);
   const [editingNote, setEditingNote] = useState<Note | null>(null);
   const [isEditing, setIsEditing] = useState<boolean>(false);
+  const [noteData, setNoteContent] = useNotes(editingNote);
 
   useEffect(() => {
     const fetchNotes = async () => {
@@ -34,17 +36,20 @@ const App: React.FC = () => {
     setReloadNotes(!reloadNotes);
   };
 
-  const handleUpdate = (note: Note) => {
-    if (!note) return;
-    setEditingNote(note);
-    setIsEditing(true);
+  const handleUpdate = (noteId: string, content: string) => {
+    if (!noteId) return;
+    const noteToUpdate = notes.find((note) => note.id === noteId);
+    if (noteToUpdate) {
+      setEditingNote(noteToUpdate);
+      setIsEditing(true);
+      setNoteContent(noteToUpdate);
+    }
   };
 
   const handleDelete = async (note: Note) => {
     if (!note) return;
     await NotesService.deleteNote(note.id);
     setReloadNotes(!reloadNotes);
-
   };
 
 

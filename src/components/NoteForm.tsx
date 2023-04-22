@@ -3,7 +3,7 @@ import type { Note } from '@prisma/client';
 import useNotes from '../hooks/useNotes';
 
 interface NoteFormProps {
-  initialValues: Note | null;
+  initialValue: Note | null;
   isEditing: boolean;
   setIsEditing: (isEditing: boolean) => void;
   onSubmit: (note: Note | Omit<Note, "title" | "id" | 'publishedAt' | 'updatedAt'>) => void;
@@ -11,32 +11,32 @@ interface NoteFormProps {
 
 const NoteForm: React.FC<NoteFormProps> = ({
   onSubmit,
-  initialValues,
+  initialValue,
   isEditing,
   setIsEditing
 }: NoteFormProps
 ) => {
-  const [note, setNotesContent] = useNotes('');
+
+  const [note, setNoteContent] = useNotes(initialValue || { content: "", id: "", title: "", publishedAt: new Date(), updatedAt: new Date() });
 
   useEffect(() => {
-    if (initialValues) {
-      setNotesContent(initialValues.content);
+    if (initialValue) {
+      setNoteContent(initialValue.content);
     } else {
-      const localNote = localStorage.getItem("noteContent");
-      setNotesContent(localNote ?? "");
+      setNoteContent("");
     }
-  }, [initialValues]);
+  }, [initialValue]);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (!note.noteContent) return;
-    if (isEditing && initialValues) {
-      onSubmit({ content: note.noteContent, id: initialValues.id });
-      setNotesContent("");
+    if (isEditing && initialValue) {
+      onSubmit({ content: note.noteContent, id: initialValue.id });
+      setNoteContent("");
       localStorage.removeItem('noteContent');
     } else {
       onSubmit({ content: note.noteContent });
-      setNotesContent("");
+      setNoteContent("");
       localStorage.removeItem('noteContent');
     }
   };
@@ -55,7 +55,7 @@ const NoteForm: React.FC<NoteFormProps> = ({
           <textarea
             id="note-content"
             value={note.noteContent}
-            onChange={(e) => setNotesContent(e.target.value)}
+            onChange={(e) => setNoteContent(e.target.value)}
             className="w-full p-2 border border-gray-300 rounded"
             rows={5}
           />
@@ -63,16 +63,16 @@ const NoteForm: React.FC<NoteFormProps> = ({
         <button
           type="submit"
           className="bg-blue-500 hover:bg-blue-600 text-white font-medium py-2 px-4 rounded disabled:bg-blue-300"
-          disabled={!note.valid || (isEditing && initialValues?.content === note.noteContent)}
+          disabled={!note.valid || (isEditing && initialValue?.content === note.noteContent)}
         >
           {isEditing ? "Update Note" : "Save Note"}
         </button>
         {isEditing && <button
           className='bg-red-500 hover:bg-red-600 text-white font-medium py-2 px-4 rounded disabled:bg-red-300'
           onClick={() => {
-            setNotesContent("");
+            setNoteContent("");
             setIsEditing(false);
-            initialValues = null
+            initialValue = null
           }}
         >Cancel</button>}
       </form>
