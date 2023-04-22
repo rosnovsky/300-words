@@ -1,4 +1,4 @@
-import type { Note } from '@prisma/client';
+import { Note } from '@/types';
 
 class NoteService {
   async getAllNotes(): Promise<Note[]> {

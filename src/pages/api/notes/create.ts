@@ -1,6 +1,5 @@
 import type { NextApiRequest, NextApiResponse } from 'next';
-import { PrismaClient } from '@prisma/client';
-const prisma = new PrismaClient();
+import { supabase } from '@/utils/supabase';
 
 export default async function handler(
   req: NextApiRequest,
@@ -9,13 +8,11 @@ export default async function handler(
   if (req.method === 'POST') {
     try {
       const noteData = req.body
-      console.log(noteData)
-      const newNote = await prisma.note.create({
-        data: noteData,
-      });
-      res.status(201).json(newNote);
+
+      const createdNote = await supabase.from('notes').insert(noteData)
+      res.status(201).json(createdNote);
     } catch (error) {
-      res.status(500).json({ error: "Error updating note", message: error });
+      res.status(500).json({ error: "Error creating note", message: error });
     }
   } else {
     res.status(405).json({ error: 'Method not allowed' });

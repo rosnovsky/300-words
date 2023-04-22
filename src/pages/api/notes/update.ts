@@ -1,6 +1,6 @@
 import type { NextApiRequest, NextApiResponse } from 'next';
-import { PrismaClient, Note } from '@prisma/client';
-const prisma = new PrismaClient();
+import type { Note } from '@/types'
+import { supabase } from '@/utils/supabase';
 
 export default async function handler(
   req: NextApiRequest,
@@ -9,11 +9,9 @@ export default async function handler(
   if (req.method === 'PUT') {
     try {
       const noteData: Note = req.body;
-      const updatedNote = await prisma.note.update({
-        where: { id: noteData.id },
-        data: noteData,
-      });
-      res.status(201).json({ success: true, message: updatedNote.id });
+      const updatedNote = await supabase.from('notes').update(noteData).eq('id', noteData.id);
+
+      res.status(201).json({ success: true, message: updatedNote.data });
     } catch (error) {
       res.status(500).json({ error: "Error updating note", message: error });
     }
