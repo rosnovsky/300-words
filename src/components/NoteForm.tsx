@@ -7,7 +7,7 @@ interface NoteFormProps {
   initialValue: Note | null;
   isEditing: boolean;
   setIsEditing: (isEditing: boolean) => void;
-  onSubmit: (note: Note | Omit<Note, "title" | "id" | 'publishedAt' | 'updatedAt'>) => void;
+  onSubmit: (note: Note | Pick<Note, "content">) => void;
 }
 
 const loadFromLocalStorage = (key?: string) => {

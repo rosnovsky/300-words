@@ -23,7 +23,7 @@ const App: React.FC = () => {
     fetchNotes();
   }, [reloadNotes]);
 
-  const handleFormSubmit = async (note: Note | Omit<Note, 'id' | 'publishedAt' | 'updatedAt' | 'title'>) => {
+  const handleFormSubmit = async (note: Note | Pick<Note, "content">) => {
     if (isEditing && editingNote) {
       await NotesService.updateNote(note as Note);
       setEditingNote(null);
