@@ -52,7 +52,6 @@ class NoteService {
     }).then(res => res.json());
     return deletedNote.id;
   }
-
 }
 
 const noteService = new NoteService()

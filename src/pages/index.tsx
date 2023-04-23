@@ -36,7 +36,6 @@ const App: React.FC = () => {
   };
 
   const handleUpdate = (note: Note) => {
-    if (!note.id) return;
     const noteToUpdate = notes.find((noteToUpdate) => noteToUpdate.id === note.id);
     if (noteToUpdate) {
       setEditingNote(noteToUpdate);
@@ -45,7 +44,6 @@ const App: React.FC = () => {
   };
 
   const handleDelete = async (note: Note) => {
-    if (!note) return;
     await NotesService.deleteNote(note.id);
     setReloadNotes(!reloadNotes);
   };
@@ -59,9 +57,17 @@ const App: React.FC = () => {
         <h1 className="text-4xl font-bold mb-10 text-center">
           300 Words a day
         </h1>
-        <NoteList notes={notes} setReloadNotes={setReloadNotes} onUpdateClick={handleUpdate} onDeleteClick={handleDelete} />
+        <NoteList
+          notes={notes}
+          setReloadNotes={setReloadNotes}
+          onUpdateClick={handleUpdate}
+          onDeleteClick={handleDelete} />
         <div className="mt-10 w-full lg:w-1/2 mx-auto">
-          <NoteForm onSubmit={handleFormSubmit} initialValue={editingNote} isEditing={isEditing} setIsEditing={setIsEditing} />
+          <NoteForm
+            onSubmit={handleFormSubmit}
+            initialValue={editingNote}
+            isEditing={isEditing}
+            setIsEditing={setIsEditing} />
         </div>
       </div>
     </div>
