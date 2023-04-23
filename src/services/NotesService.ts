@@ -2,7 +2,7 @@ import { Note } from '@/types';
 
 class NoteService {
   async getAllNotes(): Promise<Note[]> {
-    const notes: { notes: Note[] } = await fetch('http://localhost:3000/api/notes/all').then(res => res.json());
+    const notes: { notes: Note[] } = await fetch('/api/notes/all').then(res => res.json());
     return notes.notes;
   }
 
@@ -18,7 +18,7 @@ class NoteService {
       ...note,
       title
     }
-    const createdNote = await fetch('http://localhost:3000/api/notes/create', {
+    const createdNote = await fetch('/api/notes/create', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -31,7 +31,7 @@ class NoteService {
   }
 
   async updateNote(note: Note) {
-    const updatedNote = await fetch('http://localhost:3000/api/notes/update', {
+    const updatedNote = await fetch('/api/notes/update', {
       method: 'PUT',
       headers: {
         'Content-Type': 'application/json',
@@ -43,7 +43,7 @@ class NoteService {
   }
 
   async deleteNote(id: string) {
-    const deletedNote = await fetch(`http://localhost:3000/api/notes/delete/${id}`, {
+    const deletedNote = await fetch(`/api/notes/delete/${id}`, {
       method: 'DELETE',
       headers: {
         'Content-Type': 'application/json',
