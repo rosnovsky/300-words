@@ -10,7 +10,7 @@ export interface Note {
   id: string;
   title: string;
   content: string;
-  publishedAt: string;
+  createdAt: string;
   updatedAt: string;
   wordCount?: number;
   characterCount?: number;

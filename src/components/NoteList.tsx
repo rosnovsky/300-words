@@ -1,6 +1,5 @@
-import React from 'react';
-import Note from './Note';
-import type { Note as NoteType } from '@prisma/client';
+import Note from '@/components/Note';
+import type { Note as NoteType } from '@/types';
 
 interface NoteListProps {
   notes: NoteType[];

@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
-import type { Note } from '@prisma/client';
-import useNotes from '../hooks/useNotes';
-import { useLocalStorage } from '../hooks/useLocalStorage';
+import type { Note } from '@/types';
+import useNotes from '@/hooks/useNotes';
+import { useLocalStorage } from '@/hooks/useLocalStorage';
 
 interface NoteFormProps {
   initialValue: Note | null;

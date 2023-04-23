@@ -1,6 +1,4 @@
-import React from 'react';
-import type { Note as NoteType } from '@prisma/client';
-
+import type { Note as NoteType } from '@/types';
 
 interface NoteProps extends NoteType {
   onUpdateClick: () => void;
@@ -8,7 +6,7 @@ interface NoteProps extends NoteType {
   setReloadNotes: (value: boolean) => void;
 }
 
-const Note = ({ id, content, title, publishedAt, updatedAt, onDeleteClick, onUpdateClick }: NoteProps) => {
+const Note = ({ id, content, title, createdAt, updatedAt, onDeleteClick, onUpdateClick }: NoteProps) => {
 
   return (
     <div className="note bg-white p-4 rounded shadow mb-4 relative group" >
@@ -25,8 +23,8 @@ const Note = ({ id, content, title, publishedAt, updatedAt, onDeleteClick, onUpd
       </div>
       <h2 className="text-xl font-bold text-gray-800 mb-2">{title}</h2>
       <p className="text-gray-800">{content}</p>
-      <pre>id: {id} {updatedAt === publishedAt ? '' : ' (edited)'}</pre>
-      <pre>publishedAt: {new Date(publishedAt).toISOString()}</pre>
+      <pre>id: {id} {updatedAt === createdAt ? '' : ' (edited)'}</pre>
+      <pre>publishedAt: {new Date(createdAt).toISOString()}</pre>
     </div >
   );
 };

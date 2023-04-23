@@ -2,8 +2,8 @@ import { Note } from '@/types';
 
 class NoteService {
   async getAllNotes(): Promise<Note[]> {
-    const notes = await fetch('http://localhost:3000/api/notes/all').then(res => res.json());
-    return notes;
+    const notes: { notes: Note[] } = await fetch('http://localhost:3000/api/notes/all').then(res => res.json());
+    return notes.notes;
   }
 
   async createNote(note: Omit<Note, 'id' | 'updatedAt' | 'publishedAt'>) {

@@ -1,6 +1,6 @@
 import type { NextApiRequest, NextApiResponse } from 'next';
 import { supabase } from '@/utils/supabase';
-import type { Note } from '../../../types'
+import type { Note } from '@/types'
 
 export default async function handler(
   req: NextApiRequest,

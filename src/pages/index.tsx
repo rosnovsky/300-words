@@ -1,10 +1,10 @@
 import { Atkinson_Hyperlegible } from 'next/font/google'
 import NoteList from '../components/NoteList';
-import type { Note } from '@prisma/client';
+import type { Note } from '@/types';
 import React, { useState, useEffect } from 'react';
 import NoteForm from '../components/NoteForm';
 import Head from 'next/head';
-import NotesService from '../services/NotesService';
+import NotesService from '@/services/NotesService';
 
 const atkinson = Atkinson_Hyperlegible({ weight: ['400'], subsets: ['latin'] })
 
@@ -17,6 +17,7 @@ const App: React.FC = () => {
   useEffect(() => {
     const fetchNotes = async () => {
       const allNotes = await NotesService.getAllNotes();
+      console.log(allNotes)
       setNotes(allNotes);
     };
 
