@@ -42,7 +42,7 @@ class NoteService {
     return updatedNote.id;
   }
 
-  async deleteNote(id: string) {
+  async deleteNote(id: number) {
     const deletedNote = await fetch(`/api/notes/delete/${id}`, {
       method: 'DELETE',
       headers: {

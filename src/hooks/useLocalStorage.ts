@@ -1,11 +1,11 @@
 import { useState } from 'react';
 
 
-export const useLocalStorage = (data?: string, key?: string): [string, { setValue(value: string, key: string): void, deleteKey(key: string): void, }] => {
+export const useLocalStorage = (data?: string, key?: number): [string, { setValue(key: number, value: string): void, deleteKey(key: number): void, }] => {
   const [storedValue, setStoredValue] = useState(() => {
     if (!key) return data;
     try {
-      const item = window.localStorage.getItem(key);
+      const item = window.localStorage.getItem(key.toString());
       return item ? JSON.parse(item) : data;
     } catch (error) {
       console.log(error);
@@ -13,18 +13,18 @@ export const useLocalStorage = (data?: string, key?: string): [string, { setValu
     }
   });
 
-  const setValue = (key: string, value: string,) => {
+  const setValue = (key: number, value: string,) => {
     try {
       setStoredValue(value);
-      window.localStorage.setItem(key, JSON.stringify(value));
+      window.localStorage.setItem(key.toString(), JSON.stringify(value));
     } catch (error) {
       console.log(error);
     }
   };
 
-  const deleteKey = (key: string) => {
+  const deleteKey = (key: number) => {
     try {
-      window.localStorage.removeItem(key);
+      window.localStorage.removeItem(key.toString());
     } catch (error) {
       console.log(error);
     }

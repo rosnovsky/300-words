@@ -1,6 +1,6 @@
 import type { NextApiRequest, NextApiResponse } from 'next';
 import type { Note } from '@/types'
-import { supabase } from '@/utils/supabase';
+import { psClient } from '@/utils/planetscale';
 import { noteDataSchema, validateInput } from '@/utils/validatiors';
 import { errorHandler } from '@/utils/errorHandler';
 
@@ -14,9 +14,10 @@ export default validateInput(noteDataSchema, async function handler(
   } else {
     try {
       const noteData: Note = req.body;
-      const updatedNote = await supabase.from('notes').update(noteData).eq('id', noteData.id);
+      const updatedNote = await psClient.execute('UPDATE notes SET content = ?, updated_at = CURRENT_TIMESTAMP() WHERE id = ?', [noteData.content, noteData.id]);
+      console.log(updatedNote);
 
-      res.status(201).json({ success: true, message: updatedNote.data });
+      res.status(201).json({ success: true, message: updatedNote.rowsAffected });
     } catch (error: any) {
       errorHandler(res, error, "Error updateing note");
     }

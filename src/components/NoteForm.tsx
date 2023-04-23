@@ -10,14 +10,14 @@ interface NoteFormProps {
   onSubmit: (note: Note | Pick<Note, "content">) => void;
 }
 
-const loadFromLocalStorage = (key?: string) => {
+const loadFromLocalStorage = (key?: number) => {
   if (typeof window === 'undefined') {
     return null;
   }
 
   if (!key) return null;
 
-  const value = localStorage.getItem(key);
+  const value = localStorage.getItem(key.toString());
   if (!value || value === "") return null;
   return JSON.parse(value);
 }
@@ -30,7 +30,7 @@ const NoteForm: React.FC<NoteFormProps> = ({
   setIsEditing
 }: NoteFormProps
 ) => {
-  const [noteContent, setNoteContent] = useNotes(loadFromLocalStorage(initialValue?.id || 'new-note') || "");
+  const [noteContent, setNoteContent] = useNotes(loadFromLocalStorage(initialValue?.id || 0) || "");
   const [localStorage, setLocalStorage] = useLocalStorage();
   const [initialLoad, setInitialLoad] = useState(true);
 
@@ -47,10 +47,10 @@ const NoteForm: React.FC<NoteFormProps> = ({
 
   useEffect(() => {
     if (isEditing && !initialLoad) {
-      setLocalStorage.setValue(initialValue?.id || 'new-note', noteContent.noteContent);
+      setLocalStorage.setValue(initialValue?.id || 0, noteContent.noteContent);
       return;
     }
-    setLocalStorage.setValue('new-note', noteContent.noteContent);
+    setLocalStorage.setValue(0, noteContent.noteContent);
   }, [noteContent, initialLoad])
 
 
@@ -64,7 +64,7 @@ const NoteForm: React.FC<NoteFormProps> = ({
       setNoteContent("")
     } else {
       onSubmit({ content: noteContent.noteContent });
-      setLocalStorage.deleteKey('new-note');
+      setLocalStorage.deleteKey(0);
     }
   };
 
