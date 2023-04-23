@@ -9,7 +9,7 @@ const redis = new Redis({
 
 const ratelimit = new Ratelimit({
   redis: redis,
-  limiter: Ratelimit.slidingWindow(2, "10 s"),
+  limiter: Ratelimit.slidingWindow(5, "10 s"),
 });
 
 export default async function middleware(
@@ -22,5 +22,5 @@ export default async function middleware(
 }
 
 export const config = {
-  matcher: "/",
+  matcher: ["/api/notes/:path*"],
 };
