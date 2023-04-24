@@ -1,16 +1,13 @@
-declare namespace NodeJS {
-  interface Module {
-    hot?: {
-      accept(dependencies: string[] | string, callback: () => void): void;
-    };
-  }
-}
-
 export interface Note {
-  id: string;
+  id: number;
+  title: string;
   content: string;
-}
-
-export interface NoteList {
-  notes: Note[];
+  created_at: string;
+  updated_at: string;
+  metadata: {
+    wordCount?: number;
+    characterCount?: number;
+    summary?: string;
+    readingTime?: number;
+  }
 }

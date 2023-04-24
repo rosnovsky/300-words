@@ -1,13 +1,20 @@
-import React from 'react';
-import Note from './Note';
-import type { NoteList as NoteListType } from '../types'
+import Note from '@/components/Note';
+import type { Note as NoteType } from '@/types';
 
-const NoteList: React.FC<NoteListType> = ({ notes }) => {
+interface NoteListProps {
+  notes: NoteType[];
+  onUpdateClick: (note: NoteType) => void;
+  onDeleteClick: (note: NoteType) => void;
+  setReloadNotes: (value: boolean) => void;
+}
+
+const NoteList = ({ notes, setReloadNotes, onUpdateClick, onDeleteClick }: NoteListProps) => {
   return (
-    <div className="note-list">
-      {notes.map((note) => (
-        <Note key={note.id} id={note.id} content={note.content} />
-      ))}
+    <div className="note-list grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+      {notes.length > 0 &&
+        notes.map((note) => (
+          <Note key={note.id} {...note} setReloadNotes={setReloadNotes} onUpdateClick={() => onUpdateClick(note)} onDeleteClick={() => onDeleteClick(note)} />
+        ))}
     </div>
   );
 };
