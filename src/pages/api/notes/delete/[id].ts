@@ -1,26 +1,31 @@
-import type { NextApiRequest, NextApiResponse } from 'next';
+import { NextRequest, NextResponse } from 'next/server';
 import { Note } from '@/types'
 import { psClient } from '@/utils/planetscale';
 import { errorHandler } from '@/utils/errorHandler';
 
+export const config = {
+  runtime: 'edge',
+};
+
 export default async function handler(
-  req: NextApiRequest,
-  res: NextApiResponse
+  req: NextRequest,
+  res: NextResponse
 ) {
   if (req.method !== 'DELETE') {
-    res.status(405).json({ error: 'Method not allowed' });
+    return new NextResponse('Method not allowed', { status: 405 });
   } else {
     try {
-      const id: Note['id'] = Number(req.query.id) as number;
+      // NOTE: This is brittle and should be replaced with a proper url parser
+      const id = req.url.split("/").pop()?.split("?")[0]
+      console.log(id)
       if (!id) {
-        res.status(400).json({ error: 'Missing note id' });
-        return;
+        return new NextResponse('No id provided', { status: 400 });
       }
       const deletedNote = await psClient.execute(`DELETE FROM notes WHERE id = ${id}`)
 
       console.log(deletedNote)
 
-      res.status(201).json({ success: true, message: deletedNote.rowsAffected });
+      return new NextResponse("success", { status: 200 });
     } catch (error) {
       errorHandler(res, error, "Error deleting note")
     }
