@@ -9,7 +9,7 @@ const redis = new Redis({
 
 const ratelimit = new Ratelimit({
   redis: redis,
-  limiter: Ratelimit.slidingWindow(100, "60 s"),
+  limiter: Ratelimit.slidingWindow(60, "60 s"),
 });
 
 export default async function middleware(
@@ -18,7 +18,20 @@ export default async function middleware(
 ): Promise<Response | undefined> {
   const ip = request.ip ?? "127.0.0.1";
   const { success, pending, limit, reset, remaining } = await ratelimit.limit(ip);
-  return success ? NextResponse.next() : NextResponse.redirect(new URL("/blocked", request.url));;
+  const response = NextResponse.next();
+
+  response.headers.set('X-RateLimit-Limit', limit.toString(),)
+  response.headers.append('X-RateLimit-Remaining', remaining.toString())
+  response.headers.append('X-RateLimit-Reset', reset.toString())
+
+  return success ? response : new Response('Too many requests', {
+    status: 429,
+    headers: {
+      'X-RateLimit-Limit': limit.toString(),
+      'X-RateLimit-Remaining': remaining.toString(),
+      'X-RateLimit-Reset': reset.toString(),
+    },
+  })
 }
 
 export const config = {

@@ -13,6 +13,7 @@ const App: React.FC = () => {
   const [reloadNotes, setReloadNotes] = useState<boolean>(false);
   const [editingNote, setEditingNote] = useState<Note | null>(null);
   const [isEditing, setIsEditing] = useState<boolean>(false);
+  const [initialLoad, setInitialLoad] = useState<boolean>(true)
 
   useEffect(() => {
     const fetchNotes = async () => {
@@ -40,6 +41,7 @@ const App: React.FC = () => {
     if (noteToUpdate) {
       setEditingNote(noteToUpdate);
       setIsEditing(true);
+      setInitialLoad(true)
     }
   };
 
@@ -67,7 +69,9 @@ const App: React.FC = () => {
             onSubmit={handleFormSubmit}
             initialValue={editingNote}
             isEditing={isEditing}
-            setIsEditing={setIsEditing} />
+            setIsEditing={setIsEditing}
+            initialLoad={initialLoad}
+            setInitialLoad={setInitialLoad} />
         </div>
       </div>
     </div>
