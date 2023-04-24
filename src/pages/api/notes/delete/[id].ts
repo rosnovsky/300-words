@@ -23,9 +23,7 @@ export default async function handler(
       }
       const deletedNote = await psClient.execute(`DELETE FROM notes WHERE id = ${id}`)
 
-      console.log(deletedNote)
-
-      return new NextResponse("success", { status: 200 });
+      return new NextResponse(JSON.stringify(deletedNote), { status: 200 });
     } catch (error) {
       errorHandler(res, error, "Error deleting note")
     }

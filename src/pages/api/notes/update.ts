@@ -24,7 +24,7 @@ export default async function handler(
 
       const updatedNote = await psClient.execute('UPDATE notes SET content = ?, updated_at = CURRENT_TIMESTAMP() WHERE id = ?', [value.content, value.id]);
 
-      return new Response('success', { status: 200 });
+      return new Response(JSON.stringify(updatedNote), { status: 200 });
     } catch (error: any) {
       errorHandler(res, error, "Error updateing note");
     }
