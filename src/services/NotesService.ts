@@ -49,8 +49,8 @@ class NoteService {
         'Content-Type': 'application/json',
         'Accept': 'application/json'
       },
-    }).then(res => res.json());
-    return deletedNote.id;
+    }).then(res => res.ok);
+    return deletedNote
   }
 }
 
