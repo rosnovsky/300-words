@@ -1,5 +1,5 @@
+import { Note } from '@/types';
 import { z } from 'zod';
-import { NextApiRequest, NextApiResponse } from 'next';
 
 export const noteDataSchema = z.object({
   id: z.number().optional(),
@@ -9,19 +9,13 @@ export const noteDataSchema = z.object({
   content: z.string().min(5)
 });
 
-export function validateInput(schema: Zod.Schema, handler: (req: NextApiRequest, res: NextApiResponse) => void) {
-  return async function (req: NextApiRequest, res: NextApiResponse) {
-    const validatedInput = schema.safeParse(req.body);
+export function validateInput(schema: Zod.Schema, input: Partial<Note>) {
+  const validatedInput = schema.safeParse(input);
+  if (!validatedInput.success) {
+    throw new Error(validatedInput.error.issues[0].message);
+  }
 
-    if (!validatedInput.success) {
-      res.status(400).json({ error: "Invalid input data", message: validatedInput.error.issues });
-      return;
-    }
-
-    req.body = validatedInput.data;
-
-    handler(req, res);
-  };
+  return validatedInput.data;
 }
 
 
