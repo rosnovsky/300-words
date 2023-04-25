@@ -1,12 +1,13 @@
 import type { Note as NoteType } from '@/types';
 
-interface NoteProps extends NoteType {
+interface NoteProps {
   onUpdateClick: () => void;
   onDeleteClick: () => void;
-  setReloadNotes: (value: boolean) => void;
+  note: NoteType;
 }
 
-const Note = ({ id, content, title, created_at, updated_at, onDeleteClick, onUpdateClick }: NoteProps) => {
+const Note = ({ onUpdateClick, onDeleteClick, note }: NoteProps) => {
+  const { id, title, content, created_at, updated_at } = note;
 
   return (
     <div className="note bg-white p-4 rounded shadow mb-4 relative group" >

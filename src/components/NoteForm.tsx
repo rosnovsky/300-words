@@ -1,8 +1,7 @@
-import React, { useEffect, useState } from 'react';
 import type { Note } from '@/types';
-import useNotes from '@/hooks/useNotes';
-import { useLocalStorage } from '@/hooks/useLocalStorage';
+import useNoteDraft from '@/hooks/useNotesDraft';
 
+// TODO: Refactor with reducer; add loading state
 interface NoteFormProps {
   initialValue: Note | null;
   isEditing: boolean;
@@ -21,61 +20,33 @@ const NoteForm: React.FC<NoteFormProps> = ({
   setInitialLoad
 }: NoteFormProps
 ) => {
-  const [localStorage, setLocalStorage] = useLocalStorage();
-  const [noteContent, setNoteContent] = useNotes(localStorage);
-
-  // TODO: refactor this shit
-  useEffect(() => {
-    if (initialLoad && isEditing && initialValue) {
-      const value = setLocalStorage.getValue(initialValue.id);
-      if (value) {
-        setNoteContent(value);
-        setInitialLoad(false);
-        return;
-      }
-      setLocalStorage.setValue(initialValue.id, initialValue.content);
-      setNoteContent(initialValue.content);
-      setInitialLoad(false);
-      return;
-    }
-    if (isEditing && initialValue) {
-      setLocalStorage.setValue(initialValue.id, noteContent.noteContent);
-      setNoteContent(noteContent.noteContent);
-      return;
-    }
-    if (initialLoad && !initialValue) {
-      const value = setLocalStorage.getValue(0);
-      if (value) {
-        setNoteContent(value);
-        setInitialLoad(false);
-        return;
-      }
-      setLocalStorage.setValue(0, noteContent.noteContent);
-      setNoteContent(noteContent.noteContent);
-      setInitialLoad(false);
-      return
-    }
-    setLocalStorage.setValue(0, noteContent.noteContent);
-    setNoteContent(noteContent.noteContent);
-    setInitialLoad(false);
-  }, [isEditing, initialValue, noteContent, initialLoad, setNoteContent, setLocalStorage, setInitialLoad])
+  const {
+    noteContent,
+    setNoteContent,
+    saveDraft,
+    wordCount,
+    characterCount,
+    valid
+  } = useNoteDraft(
+    initialValue?.content || '',
+    isEditing ? initialValue!.id : null,
+    isEditing,
+    initialLoad,
+    setInitialLoad
+  );
 
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    if (!noteContent.noteContent) return;
+    if (!noteContent) return;
     if (isEditing && initialValue) {
-      onSubmit({ content: noteContent.noteContent, id: initialValue.id });
+      onSubmit({ content: noteContent, id: initialValue.id });
       setIsEditing(false);
-      setLocalStorage.deleteKey(initialValue.id);
-      setNoteContent("")
-      setInitialLoad(true)
+      saveDraft(initialValue.id);
     } else {
-      onSubmit({ content: noteContent.noteContent });
-      setLocalStorage.deleteKey(0);
+      onSubmit({ content: noteContent });
+      saveDraft(0);
       setIsEditing(false);
-      setNoteContent("");
-      setInitialLoad(true)
     }
   };
 
@@ -88,11 +59,11 @@ const NoteForm: React.FC<NoteFormProps> = ({
             htmlFor="note-content"
             className="block text-gray-700 font-medium mb-2"
           >
-            Note <span className="text-sm text-gray-500">{noteContent.wordCount} words, {noteContent.characterCount} characters</span>
+            Note <span className="text-sm text-gray-500">{wordCount} words, {characterCount} characters</span>
           </label>
           <textarea
             id="note-content"
-            value={noteContent.noteContent}
+            value={noteContent}
             onChange={(e) => setNoteContent(e.target.value)}
             className="w-full p-2 border border-gray-300 rounded"
             rows={5}
@@ -101,17 +72,14 @@ const NoteForm: React.FC<NoteFormProps> = ({
         <button
           type="submit"
           className="bg-blue-500 hover:bg-blue-600 text-white font-medium py-2 px-4 rounded disabled:bg-blue-300"
-          disabled={!noteContent.valid || (isEditing && initialValue?.content === noteContent.noteContent)}
+          disabled={!valid || (isEditing && initialValue?.content === noteContent)}
         >
           {isEditing ? "Update Note" : "Save Note"}
         </button>
         {isEditing && <button
           className='bg-red-500 hover:bg-red-600 text-white font-medium py-2 px-4 rounded disabled:bg-red-300'
           onClick={() => {
-            setNoteContent("");
-            setIsEditing(false);
-            setLocalStorage.deleteKey(initialValue!.id);
-            setInitialLoad(true)
+
           }}
         >Cancel</button>}
       </form>

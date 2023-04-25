@@ -1,25 +1,23 @@
 import { Atkinson_Hyperlegible } from 'next/font/google'
 import NoteList from '../components/NoteList';
 import type { Note } from '@/types';
-import React, { useState, useEffect } from 'react';
+import React, { useEffect } from 'react';
 import NoteForm from '../components/NoteForm';
 import Head from 'next/head';
 import NotesService from '@/services/NotesService';
+import { useAppContext } from '@/contexts/NotesContext';
 
 const atkinson = Atkinson_Hyperlegible({ weight: ['400'], subsets: ['latin'] })
 
 const App: React.FC = () => {
-  const [notes, setNotes] = useState<Note[]>([]);
-  const [reloadNotes, setReloadNotes] = useState<boolean>(false);
-  const [editingNote, setEditingNote] = useState<Note | null>(null);
-  const [isEditing, setIsEditing] = useState<boolean>(false);
-  const [initialLoad, setInitialLoad] = useState<boolean>(true)
+  const { state, dispatch } = useAppContext();
+
+  const { notes, reloadNotes, initialLoad, isEditing, editingNote } = state;
 
   useEffect(() => {
     const fetchNotes = async () => {
       const allNotes = await NotesService.getAllNotes();
-      console.log(allNotes)
-      setNotes(allNotes);
+      dispatch({ type: 'SET_NOTES', payload: allNotes });
     };
 
     fetchNotes();
@@ -28,26 +26,31 @@ const App: React.FC = () => {
   const handleFormSubmit = async (note: Note | Pick<Note, "content">) => {
     if (isEditing && editingNote) {
       await NotesService.updateNote(note as Note);
-      setEditingNote(null);
-      setIsEditing(false);
+      dispatch({ type: 'SET_EDITING_NOTE', payload: null });
+      dispatch({ type: 'SET_IS_EDITING', payload: false });
     } else {
       await NotesService.createNote(note as Omit<Note, 'id' | 'publishedAtAt' | 'updatedAt'>);
     }
-    setReloadNotes(!reloadNotes);
+    dispatch({ type: 'TOGGLE_RELOAD_NOTES', payload: !reloadNotes })
   };
 
   const handleUpdate = (note: Note) => {
     const noteToUpdate = notes.find((noteToUpdate) => noteToUpdate.id === note.id);
     if (noteToUpdate) {
-      setEditingNote(noteToUpdate);
-      setIsEditing(true);
-      setInitialLoad(true)
+      dispatch({
+        type: "HANDLE_UPDATE",
+        payload: {
+          editingNote: noteToUpdate,
+          initialLoad: true,
+          isEditing: true
+        }
+      })
     }
   };
 
   const handleDelete = async (note: Note) => {
     await NotesService.deleteNote(note.id);
-    setReloadNotes(!reloadNotes);
+    dispatch({ type: 'TOGGLE_RELOAD_NOTES', payload: !reloadNotes })
   };
 
   return (
@@ -60,8 +63,6 @@ const App: React.FC = () => {
           300 Words a day
         </h1>
         <NoteList
-          notes={notes}
-          setReloadNotes={setReloadNotes}
           onUpdateClick={handleUpdate}
           onDeleteClick={handleDelete} />
         <div className="mt-10 w-full lg:w-1/2 mx-auto">
@@ -69,9 +70,9 @@ const App: React.FC = () => {
             onSubmit={handleFormSubmit}
             initialValue={editingNote}
             isEditing={isEditing}
-            setIsEditing={setIsEditing}
+            setIsEditing={isEditing => dispatch({ type: 'SET_IS_EDITING', payload: isEditing })}
             initialLoad={initialLoad}
-            setInitialLoad={setInitialLoad} />
+            setInitialLoad={initialLoad => dispatch({ type: 'SET_INITIAL_LOAD', payload: initialLoad })} />
         </div>
       </div>
     </div>

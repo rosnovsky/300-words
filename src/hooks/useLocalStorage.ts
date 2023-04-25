@@ -1,44 +1,20 @@
-import { useState } from 'react';
+// hooks/useLocalStorage.ts
+import { useCallback } from 'react';
 
+const useLocalStorage = () => {
+  const setValue = useCallback((key: string | number, value: string) => {
+    localStorage.setItem(`noteContent-${key}`, value);
+  }, []);
 
-export const useLocalStorage = (data?: string, key?: number): [string, { getValue(key: number): string | undefined, setValue(key: number, value: string): void, deleteKey(key: number): void, }] => {
-  const [storedValue, setStoredValue] = useState(() => {
-    if (!key) return data;
-    try {
-      const item = localStorage.getItem(key.toString());
-      return item ? JSON.parse(item) : data;
-    } catch (error) {
-      console.log(error);
-      return data;
-    }
-  });
+  const getValue = useCallback((key: string | number) => {
+    return localStorage.getItem(`noteContent-${key}`);
+  }, []);
 
-  const setValue = async (key: number, value: string,) => {
-    try {
-      setStoredValue(() => value);
-      localStorage.setItem(key.toString(), JSON.stringify(value));
-    } catch (error) {
-      console.log(error);
-    }
-  };
+  const deleteKey = useCallback((key: string | number) => {
+    localStorage.removeItem(`noteContent-${key}`);
+  }, []);
 
-  const getValue = (key: number) => {
-    try {
-      const item = localStorage.getItem(key.toString());
-      return item ? JSON.parse(item) : data;
-    } catch (error) {
-      console.log(error);
-      return data;
-    }
-  }
+  return { setValue, getValue, deleteKey };
+};
 
-  const deleteKey = (key: number) => {
-    try {
-      localStorage.removeItem(key.toString());
-    } catch (error) {
-      console.log(error);
-    }
-  }
-
-  return [storedValue, { getValue, setValue, deleteKey }];
-}
+export default useLocalStorage;
