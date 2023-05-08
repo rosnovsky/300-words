@@ -1,28 +1,49 @@
+import Loading from '@/app/loading';
 import Note from '@/components/Note';
-import { useAppContext } from '@/contexts/NotesContext';
-import type { Note as NoteType } from '@/types';
+import noteService from '@/services/NotesService';
+import { revalidatePath } from 'next/cache';
+import { Suspense } from 'react';
 
-interface NoteListProps {
-  onUpdateClick: (note: NoteType) => void;
-  onDeleteClick: (note: NoteType) => void;
+export const config = {
+  runtime: 'edge',
+};
+
+export async function getNotes() {
+  const notes = await noteService.getAllNotes()
+  return notes;
 }
 
-const NoteList = ({ onDeleteClick, onUpdateClick }: NoteListProps) => {
-  const { state } = useAppContext();
-  const { notes } = state;
+const updateNote = async (note: string, id: number) => {
+  "use server"
+  const updatedNote = await noteService.updateNote(note, id);
+  revalidatePath('/')
+  return updatedNote;
+};
 
+const deleteNote = async (id: number) => {
+  "use server"
+  const deletedNote = await noteService.deleteNote(id);
+  revalidatePath('/')
+  return deletedNote;
+}
+
+export default async function NoteList() {
+  const notes = await getNotes() || []
   const notesInOrder = notes.sort((a, b) => {
-    return new Date(b.created_at).getTime() - new Date(a.created_at).getTime();
+    return new Date(b.created_at!).getTime() - new Date(a.created_at!).getTime();
   })
   const latestThreeNotes = notesInOrder.slice(0, 3);
   return (
     <div className="note-list grid gap-4 md:grid-cols-2 lg:grid-cols-3">
       {latestThreeNotes.length > 0 &&
         latestThreeNotes.map((note) => (
-          <Note key={note.id} note={note} onDeleteClick={() => onDeleteClick(note)} onUpdateClick={() => onUpdateClick(note)} />
+          <Suspense key={note.id} fallback={<Loading />}>
+            <Note
+              deleteNote={deleteNote}
+              updateNote={updateNote}
+              note={note} />
+          </Suspense>
         ))}
     </div>
   );
 };
-
-export default NoteList;

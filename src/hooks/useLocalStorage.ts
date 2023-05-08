@@ -1,4 +1,4 @@
-// hooks/useLocalStorage.ts
+"use client"
 import { useCallback } from 'react';
 
 const useLocalStorage = () => {

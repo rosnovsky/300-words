@@ -1,20 +1,20 @@
-import { Note } from '@/types';
+import { Note, NotesTable } from '@/types';
 
 export type AppState = {
-  notes: Note[];
+  notes: NotesTable[];
   reloadNotes: boolean;
-  editingNote: Note | null;
+  editingNote: NotesTable | null;
   isEditing: boolean;
   initialLoad: boolean;
 };
 
 export type Action =
-  | { type: 'SET_NOTES'; payload: Note[] }
+  | { type: 'SET_NOTES'; payload: NotesTable[] }
   | { type: 'TOGGLE_RELOAD_NOTES', payload: boolean }
-  | { type: 'SET_EDITING_NOTE'; payload: Note | null }
+  | { type: 'SET_EDITING_NOTE'; payload: NotesTable | null }
   | { type: 'SET_IS_EDITING'; payload: boolean }
   | { type: 'SET_INITIAL_LOAD'; payload: boolean }
-  | { type: 'HANDLE_UPDATE'; payload: { editingNote: Note | null, initialLoad: boolean, isEditing: boolean } };
+  | { type: 'HANDLE_UPDATE'; payload: { editingNote: NotesTable | null, initialLoad: boolean, isEditing: boolean } };
 
 export const initialState: AppState = {
   notes: [],

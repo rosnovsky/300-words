@@ -1,5 +1,6 @@
-// hooks/useNoteDraft.ts
-import { useState, useEffect } from 'react';
+"use client"
+
+import { useState, useEffect, useCallback } from 'react';
 import useLocalStorage from './useLocalStorage';
 
 const useNoteDraft = (
@@ -15,12 +16,12 @@ const useNoteDraft = (
   const [valid, setValid] = useState(false);
   const { setValue, getValue, deleteKey } = useLocalStorage();
 
-  const setNoteContent = (content: string) => {
+  const setNoteContent = useCallback((content: string) => {
     setNoteContentState(content);
     setWordCount(content.trim().split(/\s+/).filter(Boolean).length);
     setCharacterCount(content.length);
-    setValid(wordCount > 5)
-  };
+    setValid(wordCount >= 5)
+  }, [wordCount])
 
   useEffect(() => {
     if (initialLoad && noteId !== null) {

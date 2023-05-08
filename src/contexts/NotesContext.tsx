@@ -1,3 +1,5 @@
+"use client";
+
 import React, { createContext, Dispatch, useContext } from 'react';
 import { Action, appReducer, initialState } from '@/utils/reducers';
 

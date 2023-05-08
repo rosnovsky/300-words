@@ -11,3 +11,17 @@ export interface Note {
     readingTime?: number;
   }
 }
+
+export interface NotesTable {
+  id: Generated<number>
+  created_at?: Date
+  content: string
+  title: string
+  updated_at?: Date
+  metadata?: {
+    wordCount?: number
+    characterCount?: number
+    summary?: string
+    readingTime?: number
+  }
+}
