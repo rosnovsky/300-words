@@ -1,30 +1,37 @@
-import type { Note as NoteType } from '@/types';
+"use client"
+import { useAppContext } from '@/contexts/NotesContext';
+import { NotesTable } from '@/types';
 
-interface NoteProps extends NoteType {
-  onUpdateClick: () => void;
-  onDeleteClick: () => void;
-  setReloadNotes: (value: boolean) => void;
-}
+const Note = ({ note, deleteNote }:
+  {
+    note: NotesTable,
+    updateNote: (note: string, id: number) => void,
+    deleteNote: (id: number) => void
+  }) => {
+  const { id, title, content, created_at, updated_at } = note;
+  const { state, dispatch } = useAppContext();
 
-const Note = ({ id, content, title, created_at, updated_at, onDeleteClick, onUpdateClick }: NoteProps) => {
+  const triggerUpdate = async () => {
+    dispatch({ type: 'HANDLE_UPDATE', payload: { editingNote: note, initialLoad: true, isEditing: true } })
+  }
 
   return (
     <div className="note bg-white p-4 rounded shadow mb-4 relative group" >
       <div className="absolute top-0 right-0 mt-2 mr-2 opacity-0 group-hover:opacity-100 transition-opacity duration-200">
         <button
+          onClick={() => deleteNote(id!)}
           className="bg-red-500 text-white p-1 rounded mr-2"
-          onClick={onDeleteClick}
         >
           Delete
         </button>
-        <button className="bg-blue-500 text-white p-1 rounded" onClick={onUpdateClick}>
+        <button onClick={triggerUpdate} className="bg-blue-500 text-white p-1 rounded">
           Update
         </button>
       </div>
       <h2 className="text-xl font-bold text-gray-800 mb-2">{title}</h2>
       <p className="text-gray-800">{content}</p>
       <pre>id: {id} {updated_at === created_at ? '' : ' (edited)'}</pre>
-      <pre>publishedAt: {new Date(created_at).toLocaleString("us-US", {
+      <pre>publishedAt: {new Date(created_at!).toLocaleString("us-US", {
         day: 'numeric',
         month: 'long',
         year: 'numeric',

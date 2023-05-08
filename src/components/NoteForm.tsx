@@ -1,119 +1,83 @@
-import React, { useEffect, useState } from 'react';
-import type { Note } from '@/types';
-import useNotes from '@/hooks/useNotes';
-import { useLocalStorage } from '@/hooks/useLocalStorage';
+"use client"
+import useNoteDraft from '@/hooks/useNotesDraft';
+import type { InsertResult, UpdateResult } from 'kysely';
+import { useEffect } from 'react';
+import { useAppContext } from '@/contexts/NotesContext';
 
-interface NoteFormProps {
-  initialValue: Note | null;
-  isEditing: boolean;
-  initialLoad: boolean;
-  setInitialLoad: (initialLoad: boolean) => void;
-  setIsEditing: (isEditing: boolean) => void;
-  onSubmit: (note: Note | Pick<Note, "content">) => void;
-}
+const NoteForm = ({ createNote, updateNote }: { createNote: (note: string) => Promise<InsertResult>, updateNote: (note: string, id: number) => Promise<UpdateResult> }) => {
+  const { setNoteContent, noteContent, wordCount, characterCount, valid } = useNoteDraft(
+    "",
+    null,
+    true,
+    true,
+    () => { }
+  )
 
-const NoteForm: React.FC<NoteFormProps> = ({
-  onSubmit,
-  initialValue,
-  isEditing,
-  setIsEditing,
-  initialLoad,
-  setInitialLoad
-}: NoteFormProps
-) => {
-  const [localStorage, setLocalStorage] = useLocalStorage();
-  const [noteContent, setNoteContent] = useNotes(localStorage);
+  const { state, dispatch } = useAppContext();
+  const { editingNote, initialLoad, isEditing } = state;
 
-  // TODO: refactor this shit
   useEffect(() => {
-    if (initialLoad && isEditing && initialValue) {
-      const value = setLocalStorage.getValue(initialValue.id);
-      if (value) {
-        setNoteContent(value);
-        setInitialLoad(false);
-        return;
-      }
-      setLocalStorage.setValue(initialValue.id, initialValue.content);
-      setNoteContent(initialValue.content);
-      setInitialLoad(false);
-      return;
+    if (editingNote) {
+      setNoteContent(editingNote.content);
+      console.log('editingNote.id', editingNote.id)
     }
-    if (isEditing && initialValue) {
-      setLocalStorage.setValue(initialValue.id, noteContent.noteContent);
-      setNoteContent(noteContent.noteContent);
-      return;
-    }
-    if (initialLoad && !initialValue) {
-      const value = setLocalStorage.getValue(0);
-      if (value) {
-        setNoteContent(value);
-        setInitialLoad(false);
-        return;
-      }
-      setLocalStorage.setValue(0, noteContent.noteContent);
-      setNoteContent(noteContent.noteContent);
-      setInitialLoad(false);
-      return
-    }
-    setLocalStorage.setValue(0, noteContent.noteContent);
-    setNoteContent(noteContent.noteContent);
-    setInitialLoad(false);
-  }, [isEditing, initialValue, noteContent, initialLoad, setNoteContent, setLocalStorage, setInitialLoad])
+  }, [editingNote]);
 
-
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!noteContent.noteContent) return;
-    if (isEditing && initialValue) {
-      onSubmit({ content: noteContent.noteContent, id: initialValue.id });
-      setIsEditing(false);
-      setLocalStorage.deleteKey(initialValue.id);
-      setNoteContent("")
-      setInitialLoad(true)
-    } else {
-      onSubmit({ content: noteContent.noteContent });
-      setLocalStorage.deleteKey(0);
-      setIsEditing(false);
+  const newNote = async () => {
+    if (valid) {
+      await createNote(noteContent);
       setNoteContent("");
-      setInitialLoad(true)
+    }
+  };
+
+  const updatedNote = async () => {
+    if (valid) {
+      await updateNote(noteContent, state.editingNote!.id);
+      setNoteContent("");
+      dispatch({ type: 'HANDLE_UPDATE', payload: { editingNote: null, initialLoad: true, isEditing: false } })
     }
   };
 
   return (
     <div>
-      <h2 className="text-2xl font-bold mb-4">{!isEditing ? "Add" : "Edit"} a note</h2>
-      <form onSubmit={handleSubmit} className="note-form">
+      <h2 className="text-2xl font-bold mb-4">{state.isEditing ? `Edit note id ${state.editingNote!.id}` : "Add a note"}</h2>
+      <form className="note-form">
         <div className="mb-4">
           <label
             htmlFor="note-content"
             className="block text-gray-700 font-medium mb-2"
           >
-            Note <span className="text-sm text-gray-500">{noteContent.wordCount} words, {noteContent.characterCount} characters</span>
+            Note <span className="text-sm text-gray-500"> {wordCount} words, {characterCount} characters</span>
           </label>
           <textarea
             id="note-content"
-            value={noteContent.noteContent}
-            onChange={(e) => setNoteContent(e.target.value)}
             className="w-full p-2 border border-gray-300 rounded"
             rows={5}
+            value={noteContent}
+            onChange={e => setNoteContent(e.target.value)}
           />
         </div>
-        <button
-          type="submit"
-          className="bg-blue-500 hover:bg-blue-600 text-white font-medium py-2 px-4 rounded disabled:bg-blue-300"
-          disabled={!noteContent.valid || (isEditing && initialValue?.content === noteContent.noteContent)}
-        >
-          {isEditing ? "Update Note" : "Save Note"}
-        </button>
-        {isEditing && <button
-          className='bg-red-500 hover:bg-red-600 text-white font-medium py-2 px-4 rounded disabled:bg-red-300'
-          onClick={() => {
-            setNoteContent("");
-            setIsEditing(false);
-            setLocalStorage.deleteKey(initialValue!.id);
-            setInitialLoad(true)
-          }}
-        >Cancel</button>}
+        {!state.isEditing ? (
+          <button
+            type="submit"
+            // @ts-expect-error ts-migrate(2339) FIXME: Property 'formAction' does not exist on type 'DetailedHTMLProps<ButtonHTMLAttributes<HTMLButtonElement>, HTMLButtonElement>'.
+            formAction={newNote}
+            className="bg-blue-500 hover:bg-blue-600 text-white font-medium py-2 px-4 rounded disabled:bg-blue-300"
+            disabled={!valid}
+          >
+            Save Note
+          </button>) : (
+          <button
+            type="submit"
+            // @ts-expect-error ts-migrate(2339) FIXME: Property 'formAction' does not exist on type 'DetailedHTMLProps<ButtonHTMLAttributes<HTMLButtonElement>, HTMLButtonElement>'.
+            formAction={updatedNote}
+            className="bg-blue-500 hover:bg-blue-600 text-white font-medium py-2 px-4 rounded disabled:bg-blue-300"
+            disabled={!valid}
+          >
+            Update Note
+          </button>
+        )}
+        <button>Cancel</button>
       </form>
     </div>
   );

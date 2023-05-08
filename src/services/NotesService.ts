@@ -1,59 +1,73 @@
-import { Note } from '@/types';
+import { Note, NotesTable } from '@/types';
+import { db } from '@/utils/kysley';
+import { revalidatePath } from 'next/cache';
 
 class NoteService {
-  async getAllNotes(): Promise<Note[]> {
-    const notes: { notes: Note[] } = await fetch('/api/notes/all').then(res => res.json());
-    return notes.notes;
+  async getAllNotes() {
+    "use server"
+    const notes = await db
+      .selectFrom('notes')
+      .selectAll()
+      .execute()
+    revalidatePath('/')
+    return notes
   }
 
-  async createNote(note: Omit<Note, 'id' | 'updatedAt' | 'publishedAt'>) {
+  async createNote(note: string) {
+    "use server"
     const title = new Date().toLocaleDateString('en-US', {
       day: 'numeric',
       month: 'long',
       year: 'numeric',
       hour: 'numeric',
       minute: 'numeric',
-    })
+    });
     const noteWithTitle = {
-      ...note,
-      title
-    }
-    const createdNote = await fetch('/api/notes/create', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'Accept': 'application/json'
-      },
+      content: note,
+      title,
+      updated_at: new Date(),
+      metadata: {
+        wordCount: 0,
+        characterCount: 0,
+        readingTime: 0,
+        summary: ""
+      }
+    };
 
-      body: JSON.stringify(noteWithTitle)
-    }).then(res => res.json());
-    return createdNote.id;
+    const notes = await db
+      .insertInto('notes')
+      .values(noteWithTitle)
+      .executeTakeFirstOrThrow()
+    revalidatePath('/')
+    return notes
   }
 
-  async updateNote(note: Note) {
-    const updatedNote = await fetch('/api/notes/update', {
-      method: 'PUT',
-      headers: {
-        'Content-Type': 'application/json',
-        'Accept': 'application/json'
-      },
-      body: JSON.stringify(note)
-    }).then(res => res.json());
-    return updatedNote.id;
+
+  async updateNote(note: string, id: number) {
+    "use server"
+    const updatedNote = await db
+      .updateTable('notes')
+      .set({
+        content: note,
+        updated_at: new Date(),
+      })
+      .where('id', '=', id)
+      .executeTakeFirstOrThrow()
+    revalidatePath('/')
+    return updatedNote
   }
 
   async deleteNote(id: number) {
-    const deletedNote = await fetch(`/api/notes/delete/${id}`, {
-      method: 'DELETE',
-      headers: {
-        'Content-Type': 'application/json',
-        'Accept': 'application/json'
-      },
-    }).then(res => res.ok);
+    "use server"
+    const deletedNote = await db
+      .deleteFrom('notes')
+      .where('id', '=', id)
+      .executeTakeFirstOrThrow()
+    revalidatePath('/')
     return deletedNote
   }
 }
 
-const noteService = new NoteService()
+const noteService = new NoteService();
 
 export default noteService;
